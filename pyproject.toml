@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "async-web-server"
+version = "0.1.0"
+description = "A simple ASGI server"
+authors = ["Robert Crupa <robertcrupa@outlook.com>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "3.10.2"
+aiohttp = "^3.9.5"
+asyncio = "^3.4.3"
+pre-commit = "^3.7.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
