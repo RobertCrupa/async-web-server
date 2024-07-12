@@ -8,6 +8,8 @@ from asyncpg import Record
 from asyncpg.pool import Pool
 from typing import List
 from typing import Dict
+from database.commands import *
+import asyncio
 
 # Define route table to store endpoints
 routes = web.RouteTableDef()
@@ -57,5 +59,31 @@ app.on_cleanup.append(destroy_database_pool)
 
 # Registers our route with the app
 app.add_routes(routes)
+
+
+async def main():
+    ''' Run main to create database '''
+    connection = await asyncpg.connect( host='127.0.0.1',
+                                        port=8888,
+                                        user='user',
+                                        password='password',
+                                        database='mydb',)
+    statements = [CREATE_BRAND_TABLE,
+                  CREATE_PRODUCT_TABLE,
+                  CREATE_PRODUCT_COLOR_TABLE,
+                  CREATE_PRODUCT_SIZE_TABLE,
+                  CREATE_SKU_TABLE,
+                  SIZE_INSERT,
+                  COLOR_INSERT]
+
+    print('Creating the product database...')
+    for statement in statements:
+        status = await connection.execute(statement)
+        print(status)
+    print('Finished creating the product database!')
+    await connection.close()
+
+
+# asyncio.run(main())
 
 web.run_app(app)
