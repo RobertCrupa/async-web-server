@@ -1,5 +1,5 @@
 # async-web-server
-🚀 A simple ASGI webserver 
+🚀 A simple ASGI webserver
 
 ## Setting up Postgres docker database
 

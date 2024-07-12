@@ -1,3 +1,4 @@
+from __future__ import annotations
 CREATE_BRAND_TABLE = \
     """
     CREATE TABLE IF NOT EXISTS brand(
@@ -35,11 +36,11 @@ CREATE_SKU_TABLE = \
        product_id INT NOT NULL,
        product_size_id INT NOT NULL,
        product_color_id INT NOT NULL,
-       FOREIGN KEY (product_id) 
+       FOREIGN KEY (product_id)
           REFERENCES product(product_id),
-       FOREIGN KEY (product_size_id) 
+       FOREIGN KEY (product_size_id)
        REFERENCES product_size(product_size_id),
-       FOREIGN KEY (product_color_id) 
+       FOREIGN KEY (product_color_id)
        REFERENCES product_color(product_color_id)
     );"""
 
