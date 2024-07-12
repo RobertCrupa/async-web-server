@@ -12,6 +12,7 @@ python = "3.10.2"
 aiohttp = "^3.9.5"
 asyncio = "^3.4.3"
 pre-commit = "^3.7.1"
+asyncpg = "^0.29.0"
 
 
 [build-system]
