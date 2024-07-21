@@ -204,21 +204,6 @@ class UserCounter(WebSocketEndpoint):
     encoding = 'text'
     sockets = []
 
-    async def _send_count(self):
-        if len(UserCounter.sockets) > 0:
-            count_str = str(len(UserCounter.sockets))
-            task_to_socket = {asyncio.create_task(websocket.send_text(count_str)) : websocket
-                              for websocket in UserCounter.sockets}
-            
-            done, pending = await asyncio.wait(task_to_socket, return_when=asyncio.ALL_COMPLETED)
-
-            for task in done:
-                if task.exception() is None and \
-                    task_to_socket[task] in UserCounter.sockets:
-                    
-                    UserCounter.sockets.remove(task_to_socket[task])
-        
-
     async def on_connect(self, websocket):
         await websocket.accept()
         UserCounter.sockets.append(websocket)
