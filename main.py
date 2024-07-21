@@ -5,6 +5,7 @@ from typing import Dict  # noqa, flake8 issue
 from typing import List  # noqa, flake8 issue
 
 import asyncpg
+import asyncio
 from aiohttp import web
 from asyncpg import Record
 from asyncpg.pool import Pool
@@ -14,6 +15,8 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.responses import Response
 from starlette.routing import Route
+from starlette.endpoints import WebSocketEndpoint
+from starlette.routing import WebSocketRoute
 
 from database import gen_products
 from database import gen_skus
@@ -192,6 +195,37 @@ async def destroy_database_pool() -> None:
 
     pool = app.state.DB
     await pool.close()
+
+class UserCounter(WebSocketEndpoint):
+    encoding = 'text'
+    sockets = []
+
+    async def _send_count(self):
+        if len(UserCounter.sockets) > 0:
+            count_str = str(len(UserCounter.sockets))
+            task_to_socket = {asyncio.create_task(websocket.send_text(count_str)) : websocket
+                              for websocket in UserCounter.sockets}
+            
+            done, pending = await asyncio.wait(task_to_socket, return_when=asyncio.ALL_COMPLETED)
+
+            for task in done:
+                if task.exception() is None and \
+                    task_to_socket[task] in UserCounter.sockets:
+                    
+                    UserCounter.sockets.remove(task_to_socket[task])
+        
+
+    async def on_connect(self, websocket):
+        await websocket.accept()
+        UserCounter.sockets.append(websocket)
+        await self._send_count()
+
+    async def on_disconnect(self, websocket, close_code):
+        UserCounter.sockets.remove(websocket)
+        await self._send_count()
+
+    async def on_receive(self, websocket, data):
+        pass
 
 app = Starlette(
     routes=[Route('/brands', brands)],
