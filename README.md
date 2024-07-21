@@ -16,3 +16,4 @@
 
 1. Install requirements with poetry `poetry install`
 2. Run server `poetry run uvicorn --workers 8 --log-level error main:app`
+3. Open [homepage](http://127.0.0.1:8000/statics/index.html)

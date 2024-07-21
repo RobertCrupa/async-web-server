@@ -17,6 +17,10 @@ from starlette.responses import Response
 from starlette.routing import Route
 from starlette.endpoints import WebSocketEndpoint
 from starlette.routing import WebSocketRoute
+from starlette.responses import HTMLResponse
+from starlette.endpoints import HTTPEndpoint
+from starlette.routing import Mount
+from starlette.staticfiles import StaticFiles
 
 from database import gen_products
 from database import gen_skus
@@ -227,8 +231,28 @@ class UserCounter(WebSocketEndpoint):
     async def on_receive(self, websocket, data):
         pass
 
+    async def _send_count(self):
+        num_sockets = len(UserCounter.sockets)
+        if num_sockets:
+            count_string = str(num_sockets)
+            task_to_socket = {asyncio.create_task(websocket.send_text(count_string)): websocket
+                              for websocket in UserCounter.sockets}
+            
+            done, pending = await asyncio.wait(task_to_socket)
+
+            for task in done:
+                if task.exception() is not None: # remove connections that raise exceptions
+                    if task in UserCounter.sockets:
+                        UserCounter.remove(task)
+
+routes=[
+    Route('/brands', brands),
+    WebSocketRoute('/counter', UserCounter),
+    Mount('/statics', app=StaticFiles(directory='statics'), name="statics"),
+]
+
 app = Starlette(
-    routes=[Route('/brands', brands)],
+    routes=routes,
     on_startup=[create_database_pool],
     on_shutdown=[destroy_database_pool],
 )
